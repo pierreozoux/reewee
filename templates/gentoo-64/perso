@@ -1,0 +1,8 @@
+vi /Users/PierreOzoux/.ssh/known_hosts
+ssh root@macbook
+chroot="/mnt/gentoo"
+mount /dev/sda3 "$chroot" && cd "$chroot"
+mkdir -p boot && mount /dev/sda2 boot
+mkdir -p boot/efi && mount -t vfat /dev/sda1 boot/efi
+mkdir -p boot/efi/EFI
+chroot $chroot

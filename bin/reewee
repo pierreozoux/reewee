@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+template="gentoo-64"
+templates_path="templates"
+template_path = "#{templates_path}/#{template}"
+
+require_relative "../#{template_path}/definition"
+
+def ssh command
+	user=SESSION[:ssh_user]
+	ip=SESSION[:ssh_ip]
+
+	system("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no #{user}@#{ip} '#{command}'")
+end
+
+def scp file
+	user=SESSION[:ssh_user]
+	ip=SESSION[:ssh_ip]
+
+	`scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no #{file} #{user}@#{ip}:/root/`
+end
+
+p SESSION
+
+Dir.chdir("#{template_path}")
+
+#scp scripts
+postinstall_files=SESSION[:postinstall_files]
+
+#execute script
+
+postinstall_files.each do |postinstall_file|
+	p postinstall_file
+	scp postinstall_file
+	ssh "chmod 755 ./#{postinstall_file};./#{postinstall_file}"
+	ssh "rm #{postinstall_file}"
+	if postinstall_file == "reboot.sh"
+		sleep 30
+	end
+end
